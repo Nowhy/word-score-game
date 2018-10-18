@@ -127,12 +127,8 @@ function displayHand(){
 		console.log("#letter-" + (i+1) +" set to " + YOUR_HAND[i].letter);
 		$( "#letter-" + (i+1)).addClass("letter-" + YOUR_HAND[i].letter);
 		$( "#points-" + (i+1)).addClass("points-" + YOUR_HAND[i].pointsWhenLettersUsed);
-		
-		
-		
-		
+
 		$( "#letter-" + (i+1)).html(YOUR_HAND[i].letter);
-		
 		$( "#points-" + (i+1)).html(YOUR_HAND[i].pointsWhenLettersUsed);
 	}
 	
@@ -150,11 +146,106 @@ function getAvailableLetter(){
 
 function findWordToUse(){
  //TODO Your job starts here.
-	alert("Your code needs to go here");	
+
+ 	var str = getStrFromLargeToSmall();
+ 	if(str.indexOf('_')==-1){
+ 		return findTheHighestScoreWord(str);
+	}else{
+		for(i=0;i<str.length;i++){
+ 			if(str[i]=='_'){
+ 				for(m='A';m<='Z';m++){
+ 					console.log(m);
+ 					var newStr = "";
+ 					newStr = str.substring(0,i) + m + str.substring(i+1,str.length);
+ 					console.log(newStr);
+ 					findTheHighestScoreWord(newStr);
+ 				}
+ 			}
+ 		}
+	}
+
+
 }
-function humanFindWordToUse(){
+
+function findTheHighestScoreWord(str){
+	let strArr = getCombination(str);
+ 	for(ii=0;ii<strArr.length;ii++){
+ 		let allPerputation = getPerputation(strArr[ii]);
+ 		for(m=0;m<allPerputation.length;m++){
+ 			if(isThisAWord(allPerputation[m])){
+				humanFindWordToUse(allPerputation[m]);
+				//alert("Try this word:   "+allPerputation[m] + ".  You will get the highest score");	
+	 			return ;
+			}
+		}
+ 	}
+ 	 alert("No valid words!");
+}
+
+function getStrFromLargeToSmall(){
+	let tempStrArr = [];
+	for(i=0;i<YOUR_HAND.length;i++){
+ 		tempStrArr.push(YOUR_HAND[i].letter);
+ 	}
+ 	let tempArr = [];
+ 	for(i=0;i<YOUR_HAND.length;i++){
+ 		tempArr.push(YOUR_HAND[i].pointsWhenLettersUsed);
+ 	}
+ 	for(i=0;i<YOUR_HAND.length;i++){
+ 		for(ii=0;ii<YOUR_HAND.length-1;ii++){
+ 			if(tempArr[ii] < tempArr[ii+1]){
+ 				var temp = tempArr[ii+1];
+ 				tempArr[ii+1] = tempArr[ii];
+ 				tempArr[ii] = temp;
+
+ 				var tempStr = tempStrArr[ii+1];
+ 				tempStrArr[ii+1] = tempStrArr[ii];
+ 				tempStrArr[ii] = tempStr;
+ 			}
+ 		}
+ 	}
+ 	var str="";
+ 	for(i=0;i<YOUR_HAND.length;i++){
+ 		str=str+tempStrArr[i];
+ 	}
+ 	console.log(str);
+	return str;
+
+}
+
+
+function getCombination(str){
+    if(str.length === 1){
+        return [str]
+    }
+
+    let arr1 = arguments.callee(str.slice(1));
+    let res1 = arr1.map(x => str[0]+x);
+    let res2 = arguments.callee(str.slice(1));
+    let res3 = [str[0]]
+    return res1.concat(res2,res3);
+}
+
+function getPerputation(str){
+    if (str.length == 1) {
+        return [str];
+    }
+    let res = []
+    let arr = arguments.callee(str.slice(1));
+    for(let i = 0;i < arr.length;i++){
+        let partArr = [];
+        for(let j = 0;j < arr[i].length+1;j++){
+            let newStr = arr[i].slice(0,j) + str[0] + arr[i].slice(j);
+            partArr.push(newStr);
+        }
+        res = res.concat(partArr)
+    }
+    return res;
+}
+
+function humanFindWordToUse(humanFoundWord){
 	
-	 var humanFoundWord = $( "#human-word-input").val();
+	 //var humanFoundWord = $( "#human-word-input").val();
 	 console.log("Checking human workd of:" + humanFoundWord);
 	 if(isThisAWord(humanFoundWord)){
 		 if(haveLettersForWord(humanFoundWord)){
@@ -164,7 +255,7 @@ function humanFindWordToUse(){
 		 }
 	 }else{
 		 alert(humanFoundWord + " is not a valid word.");
-	 }
+	 } 
 		
 }
 
@@ -203,20 +294,44 @@ function takeOutUsedLetters(){
 function haveLettersForWord(aProposedWord){
 	//You could code the _ logic could go in this function
 	var wordAsArray = aProposedWord.toUpperCase().split("");
+	/* HAN BAO
+	 * mark how many letters have been used.
+	 */
+	var underLine = "_";
 	for (i = 0; i < wordAsArray.length; i++) {
 		var foundLetter = false;
 		console.log(wordAsArray[i] + "<-For match");
+		mark =-1;
 		for(ii=0; ii<YOUR_HAND.length; ii++){
 			console.log("              " + YOUR_HAND[ii].letter + "<-Checking");
-			if(YOUR_HAND[ii].letter == wordAsArray [i]){
+			/* HAN BAO
+			 * only need to add a mark to "_"
+			 */
+			if(YOUR_HAND[ii].letter == underLine){
+				mark = ii;
+			}
+
+			if(YOUR_HAND[ii].letter == wordAsArray [i]){ 
 				if(!YOUR_HAND[ii].used && !foundLetter){
 					console.log("     " + YOUR_HAND[ii].letter + "<-Found");
 					YOUR_HAND[ii].used = true;
 					foundLetter = true;
+					/* HAN BAO
+			 		 * do not need to continue the loop
+			         */
+					break;
 					
 				}
 			}
+			/* HAN BAO
+			 * if there is no current letter in hand but there is a "_" in hand, use "_" to replace this letter.
+			 */
+			if(ii == YOUR_HAND.length-1 && mark >= 0){
+				YOUR_HAND[mark].used = true;
+				foundLetter = true;
+			}
 		}
+
 		
 		
 		if(!foundLetter){
@@ -232,7 +347,10 @@ function haveLettersForWord(aProposedWord){
 function resetHand(){
 	
 	for(ii=0; ii<YOUR_HAND.length; ii++){
-		YOUR_HAND[i].used = false;
+		YOUR_HAND[ii].used = false;
+		/* HAN BAO
+		 *  ii ? i。。。。 maybe wrong?
+		 */
 	}
 }
 
@@ -250,6 +368,7 @@ function retireHand(){
 	addNumbersFromBag();
 	displayHand();
 }
+
 function clearClasses(){
 	for(ii=0; ii < YOUR_HAND.length; ii++){
 		$("#letter-" + (ii+1)).removeClass("letter-" + YOUR_HAND[ii].letter);
@@ -264,14 +383,16 @@ $(document).ready(function() {
 		findWordToUse();
 	});
 	$("#human-find-word-button").click(function() {
-		humanFindWordToUse();
+		var humanFoundWord = $( "#human-word-input").val();
+		humanFindWordToUse(humanFoundWord);
 	});
 	$("#retire-hand-button").click(function() {
 		retireHand();
 	});
 	$('#human-word-input').keypress(function(event) {
 		if (event.which == 13) {
-			humanFindWordToUse();
+			var humanFoundWord = $( "#human-word-input").val();
+			humanFindWordToUse(humanFoundWord);
 		}
 	});
 });

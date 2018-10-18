@@ -143,12 +143,14 @@ function getAvailableLetter(){
 	return randomLetter[0];
 }
 
-
+/* HAN BAO
+ * 用排过序的7张牌可以有效减少检查分值次数
+ */
 function findWordToUse(){
  //TODO Your job starts here.
 
- 	var str = getStrFromLargeToSmall();
- 	if(str.indexOf('_')==-1){
+ 	var str = getStrFromLargeToSmall();//从分值的大小重新得到手上的7张牌
+ 	if(str.indexOf('_')==-1){//如果没有下划线，直接用这7张牌做
  		return findTheHighestScoreWord(str);
 	}else{
 		for(i=0;i<str.length;i++){
@@ -158,7 +160,7 @@ function findWordToUse(){
  					var newStr = "";
  					newStr = str.substring(0,i) + m + str.substring(i+1,str.length);
  					console.log(newStr);
- 					findTheHighestScoreWord(newStr);
+ 					findTheHighestScoreWord(newStr);//用新的的7张牌做
  				}
  			}
  		}
@@ -167,6 +169,11 @@ function findWordToUse(){
 
 }
 
+/* HAN BAO
+ * 用这7张牌先得到所有可能的组合但自身先不排序（7张的组合，6张的组合。。。1张的组合）
+ * 再拿这7张的组合去得到所有排序可能性
+ * 得到可能性后直接用humanFindWordToUse 这个function来查看其合理性，如存在，这就是最高分了，不必接下去看了。
+ */
 function findTheHighestScoreWord(str){
 	let strArr = getCombination(str);
  	for(ii=0;ii<strArr.length;ii++){
@@ -182,6 +189,10 @@ function findTheHighestScoreWord(str){
  	 alert("No valid words!");
 }
 
+/* HAN BAO
+ * 因为只有7张，所以冒泡排序就可以很快的解决从大到小的问题。
+ * 因为我没学过js,所以这个地方有点浪费代码。是用了两个array来分别记录分数和字母，最后用String重新组起来。
+ */
 function getStrFromLargeToSmall(){
 	let tempStrArr = [];
 	for(i=0;i<YOUR_HAND.length;i++){
@@ -213,7 +224,9 @@ function getStrFromLargeToSmall(){
 
 }
 
-
+/* HAN BAO
+ * Eg. str = abc, 那么我就能得到abc,ab,bc,ac,a,b,c六种可能。但是这六种是按照abc的顺序来的，并没有考虑自身的排序。
+ */
 function getCombination(str){
     if(str.length === 1){
         return [str]
@@ -226,6 +239,9 @@ function getCombination(str){
     return res1.concat(res2,res3);
 }
 
+/* HAN BAO
+ * Eg. str = abc, 那么我就能得到abc,acb,bac,bca,cab,cba也是六种可能性。这样可以节省时间和空间。
+ */
 function getPerputation(str){
     if (str.length == 1) {
         return [str];
@@ -243,6 +259,9 @@ function getPerputation(str){
     return res;
 }
 
+/* HAN BAO
+ * 改了签名，加了一个input，因为我在check每个单词的时候，直接用的这个function。
+ */
 function humanFindWordToUse(humanFoundWord){
 	
 	 //var humanFoundWord = $( "#human-word-input").val();
